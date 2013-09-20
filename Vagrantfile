@@ -1,57 +1,73 @@
 Vagrant.configure("2") do |config|
 
-  config.vm.define "jenkins" do |jenkins|
-    jenkins.vm.box = "base64"
-    jenkins.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  # config.vm.define "jenkins" do |jenkins|
+  #   jenkins.vm.box = "base64"
+  #   jenkins.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
-    jenkins.vm.provider :virtualbox do |vb|
-        vb.customize ["modifyvm", :id, "--memory", 1024]
-        vb.customize ["modifyvm", :id, "--cpus", 2]
-    end
+  #   jenkins.vm.provider :virtualbox do |vb|
+  #       vb.customize ["modifyvm", :id, "--memory", 1024]
+  #       vb.customize ["modifyvm", :id, "--cpus", 2]
+  #   end
 
-    jenkins.vm.network :forwarded_port, guest: 8080, host: 8080
-    jenkins.vm.network "private_network", ip: "10.0.1.10"
+  #   jenkins.vm.network :forwarded_port, guest: 8080, host: 8080
+  #   jenkins.vm.network "private_network", ip: "10.0.1.10"
 
-    jenkins.vm.provision :shell do |s|
-      s.path = "vagrant-scripts/bootstrap.sh"
-      s.path = "vagrant-scripts/bootstrap-jenkins.sh"
-    end
-  end
+  #   jenkins.vm.provision :shell do |s|
+  #     s.path = "vagrant-scripts/bootstrap.sh jenkins"
+  #   end
+  # end
 
-  config.vm.define "www" do |www|
-    www.vm.box = "base64"
-    www.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  # config.vm.define "nginx" do |nginx|
+  #   nginx.vm.box = "base64"
+  #   nginx.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
-    www.vm.provider :virtualbox do |vb|
+  #   nginx.vm.provider :virtualbox do |vb|
+  #       vb.customize ["modifyvm", :id, "--memory", 512]
+  #       vb.customize ["modifyvm", :id, "--cpus", 1]
+  #   end
+
+  #   nginx.vm.network :forwarded_port, guest: 80, host: 80
+  #   nginx.vm.network "private_network", ip: "10.0.1.100"
+
+  #   nginx.vm.provision :shell do |s|
+  #     s.path = "vagrant-scripts/bootstrap.sh nginx"
+  #   end
+  # end
+
+  config.vm.define "apache2" do |apache2|
+    apache2.vm.box = "base64"
+    apache2.vm.box_url = "http://files.vagrantup.com/precise64.box"
+
+    apache2.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", 512]
         vb.customize ["modifyvm", :id, "--cpus", 1]
     end
 
-    www.vm.network :forwarded_port, guest: 80, host: 80
-    www.vm.network "private_network", ip: "10.0.1.100"
+    apache2.vm.hostname = "www-apache2.vagrant.lan"
+    
+    apache2.vm.network :forwarded_port, guest: 80, host: 8080
+    apache2.vm.network "private_network", ip: "10.0.1.100"
 
-    www.vm.provision :shell do |s|
-      s.path = "vagrant-scripts/bootstrap.sh"
-      s.path = "vagrant-scripts/bootstrap-www.sh"
-    end
+    apache2.vm.synced_folder "./www/", "/var/www"
+
+    apache2.vm.provision :shell, :path => "vagrant-scripts/bootstrap.sh", :args => "apache2"
   end
 
-  config.vm.define "db" do |db|
-    db.vm.box = "base64"
-    db.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  config.vm.define "mysql" do |mysql|
+    mysql.vm.box = "base64"
+    mysql.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
-    db.vm.provider :virtualbox do |vb|
+    mysql.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", 512]
         vb.customize ["modifyvm", :id, "--cpus", 1]
     end
 
-    db.vm.network :forwarded_port, guest: 3306, host: 3306
-    db.vm.network "private_network", ip: "10.0.1.200"
+    mysql.vm.network :forwarded_port, guest: 3306, host: 13306
+    mysql.vm.network "private_network", ip: "10.0.1.200"
 
-    db.vm.provision :shell do |s|
-      s.path = "vagrant-scripts/bootstrap.sh"
-      s.path = "vagrant-scripts/bootstrap-mysql.sh"
-    end
+    mysql.vm.hostname = "db-mysql.vagrant.lan"
+
+    mysql.vm.provision :shell, :path => "vagrant-scripts/bootstrap.sh", :args => "mysql"
   end
 
 end
