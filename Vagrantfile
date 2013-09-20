@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "apache2" do |apache2|
     apache2.vm.box = "base64"
-    apache2.vm.box_url = "http://files.vagrantup.com/precise64.box"
+    apache2.vm.box_url = "/vagrant/box/precise64.box"
 
     apache2.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", 512]
@@ -50,12 +50,12 @@ Vagrant.configure("2") do |config|
 
     apache2.vm.synced_folder "./www/", "/var/www"
 
-    apache2.vm.provision :shell, :path => "vagrant-scripts/bootstrap.sh", :args => "apache2"
+    apache2.vm.provision :shell, :path => "bootstrap.sh", :args => "apache2"
   end
 
   config.vm.define "mysql" do |mysql|
     mysql.vm.box = "base64"
-    mysql.vm.box_url = "http://files.vagrantup.com/precise64.box"
+    mysql.vm.box_url = "http://localhost/vagrant/box/precise64.box"
 
     mysql.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", 512]
@@ -67,7 +67,7 @@ Vagrant.configure("2") do |config|
 
     mysql.vm.hostname = "db-mysql.vagrant.lan"
 
-    mysql.vm.provision :shell, :path => "vagrant-scripts/bootstrap.sh", :args => "mysql"
+    mysql.vm.provision :shell, :path => "bootstrap.sh", :args => "mysql"
   end
 
 end
