@@ -11,8 +11,8 @@ Vagrant.configure("2") do |config|
         vb.customize ["modifyvm", :id, "--cpus", 4]
     end
 
-    jenkins.vm.network "public_network"
-    #jenkins.vm.network "private_network", :ip => "10.0.1.10"
+    #jenkins.vm.network "public_network", :bridge => 'eth0', :autoconfigure => 'false'
+    jenkins.vm.network "private_network", :ip => "10.0.1.10"
 
     jenkins.vm.provision :shell, :path => "bootstrap.sh", :args => "jenkins"
   end
