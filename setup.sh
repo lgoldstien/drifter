@@ -6,9 +6,13 @@ clear
 # Echo welcome
 echo "Welcome to the drifter setup script."
 echo ""
+echo "Written by Lawrence G"
+echo ""
 echo "This will guide you through getting a vagrant infrastructure up and running."
 echo ""
 echo "Checking compatability..."
+echo ""
+echo ""
 
 # Make sure we are running as root.
 if [ "$(id -u)" != "0" ]; then
