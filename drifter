@@ -1,0 +1,146 @@
+#!/bin/bash
+
+show_help () {
+    echo "-= Drifter =-
+
+drifter init <provider> [bundles]
+    - Initialise a vagrant box with the listed bundles
+
+drifter start
+    - Same action as vagrant start
+
+drifter stop
+    - Same action as vagrant halt
+
+drifter reload
+    - Same action as vagrant reload
+
+"
+}
+
+show_invalid () {
+    echo "You have entered an invalid command.
+"
+    show_help
+}
+
+download_box () {
+    curl -o $HOME/.drifter/precise$ARCH.box http://hc-vagrant-files.s3.amazonaws.com/precise$ARCH.box
+}
+
+create_dot_drifter () {
+    if ! [ -d $HOME/.drifter ]
+        then
+        mkdir $HOME/.drifter
+    fi
+}
+
+check_for_vagrant () {
+    # Check that we have vagrant installed
+    command -v vagrant >/dev/null 2>&1 || {
+        echo >&2 "You need to install vagrant to use this program. http://www.vagrantup.com/downloads.html";
+        exit 1;
+    }
+}
+
+check_for_arch () {
+    # Are we on 32 or 64 bit os?
+    TMP_ARCH=$(uname -m)
+    if [ "$TMP_ARCH" == "x86_64" ]
+    then
+        ARCH="64"
+    else
+        ARCH="32"
+    fi
+}
+
+check_for_box () {
+    # Check if we have the distro downloaded, if not then download it
+    if ! [ -f "$HOME/.drifter/precise$ARCH.box" ]
+        then
+            read -r -p "You do not have the required box installed, would you like to download it now? [y/N] " response
+            case $response in
+                [yY][eE][sS]|[yY])
+                    download_box
+                    ;;
+                *)
+                    echo "Exiting the program as you do not appear to have any boxes available.";
+                    exit 1;
+                    ;;
+            esac
+    fi
+}
+
+check_for_vagrantfile () {
+    if [ -f "Vagrantfile" ]
+        then
+            echo "There is already a Vagrantfile in this directory, if you proceed it will be deleted."
+            read -r -p "Go ahead anyway? [y/N] " response
+            case $response in
+                [yY][eE][sS]|[yY])
+                    
+                    ;;
+                *)
+                    echo "Exiting the program as you do not want to overwrite your Vagrantfile.";
+                    exit 1;
+                    ;;
+            esac
+    fi
+}
+
+get_action () {
+    case $1 in
+        init)
+            ACTION="INIT"
+            action_init $@
+            ;;
+        start)
+            ACTION="START"
+            action_start
+            ;;
+        stop)
+            ACTION="STOP"
+            action_stop
+            ;;
+        reload)
+            ACTION="RELOAD"
+            action_reload
+            ;;
+        *)
+            show_invalid
+            exit 1;
+            ;;
+    esac
+}
+
+get_provider () {
+    case $2 in
+        vbox)
+            PROVIDER="vbox"
+            ;;
+        *)
+            show_invalid
+            exit 1;
+            ;;
+    esac
+}
+
+action_init () {
+    #check_for_vagrantfile
+    get_provider $@
+}
+
+main () {
+    # Create the ~/.drifter folder if it doesn't exist
+    create_dot_drifter
+    
+    # Run checks and set up anything that is missing
+    check_for_vagrant
+    check_for_arch
+    check_for_box
+
+    get_action $@
+
+}
+
+main $@
